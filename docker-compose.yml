@@ -1,0 +1,29 @@
+version: '3'
+
+volumes:
+    web-logs:
+        driver: local
+
+services:
+    web:
+        build: .
+        image: ${PYTHON_FASTAPI_TEMPLATE_IMAGE:-web}
+        container_name: web
+        platform: linux/amd64
+        restart: unless-stopped
+        ports:
+            - 8000:8000
+        volumes:
+            - web-logs:/logs
+
+        mem_limit: 128M
+
+        logging:
+            driver: json-file
+            options:
+                max-size: 10m
+        healthcheck:
+            test: curl -fs http://localhost:8000/redoc || exit 1
+            interval: 2s
+            timeout: 1s
+            retries: 3
